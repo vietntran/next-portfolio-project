@@ -4,6 +4,7 @@ const createJestConfig = nextJest({
   dir: "./",
 });
 
+/** @type {import('jest').Config} */
 const customJestConfig = {
   setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
   testEnvironment: "jest-environment-jsdom",
@@ -11,8 +12,15 @@ const customJestConfig = {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
   transform: {
-    "^.+\\.(ts|tsx)$": "ts-jest",
+    "^.+\\.(ts|tsx)$": [
+      "ts-jest",
+      {
+        useESM: true,
+      },
+    ],
   },
+  extensionsToTreatAsEsm: [".ts", ".tsx"],
+  moduleFileExtensions: ["ts", "tsx", "js", "jsx", "json", "node"],
 };
 
 module.exports = createJestConfig(customJestConfig);
