@@ -1,3 +1,4 @@
+// src/app/api/users/[id]/route.ts
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import logger from "@/lib/logger";
@@ -24,15 +25,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Validate and parse the ID parameter
-    const parsedId = parseInt(params.id);
-    if (isNaN(parsedId)) {
-      logger.warn("Invalid user ID format", { userId: params.id });
-      return NextResponse.json(
-        { error: "Invalid user ID format" },
-        { status: 400 }
-      );
-    }
+    const { id } = params;
 
     const body = await request.json();
 
@@ -41,7 +34,7 @@ export async function PUT(
 
     if (!result.success) {
       logger.warn("Invalid request body", {
-        userId: parsedId,
+        userId: id,
         body,
         errors: result.error.issues,
       });
@@ -57,7 +50,7 @@ export async function PUT(
     const { name, email } = result.data;
 
     const user = await prisma.user.update({
-      where: { id: parsedId }, // Now using the parsed integer ID
+      where: { id },
       data: {
         name,
         email,
@@ -66,7 +59,7 @@ export async function PUT(
     });
 
     logger.info("User updated successfully", {
-      userId: parsedId,
+      userId: id,
       updatedFields: { name, email },
     });
 
@@ -94,26 +87,18 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Validate and parse the ID parameter
-    const parsedId = parseInt(params.id);
-    if (isNaN(parsedId)) {
-      logger.warn("Invalid user ID format", { userId: params.id });
-      return NextResponse.json(
-        { error: "Invalid user ID format" },
-        { status: 400 }
-      );
-    }
+    const { id } = params;
 
     const user = await prisma.user.findUnique({
-      where: { id: parsedId }, // Using parsed integer ID
+      where: { id },
     });
 
     if (!user) {
-      logger.warn("User not found", { userId: parsedId });
+      logger.warn("User not found", { userId: id });
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    logger.info("User fetched successfully", { userId: parsedId });
+    logger.info("User fetched successfully", { userId: id });
     return NextResponse.json(user);
   } catch (error) {
     logger.error("Failed to fetch user", {
