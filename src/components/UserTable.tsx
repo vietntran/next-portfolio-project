@@ -1,100 +1,115 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-type User = {
-  id: number;
-  name: string | null;
-  email: string;
-  createdAt: string;
-};
+import { useRouter, useSearchParams } from "next/navigation";
+import { fetchUsers } from "@/services/userService";
+import type { User } from "@/services/userService";
 
 export default function UserTable() {
-  const [users, setUsers] = useState<User[]>([]);
+  const [usersData, setUsersData] = useState<{
+    users: User[];
+    totalPages: number;
+  }>({
+    users: [],
+    totalPages: 1,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch("/api/users");
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to fetch users");
-      }
-
-      setUsers(data);
-      setError(null);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "Failed to fetch users. Please try again.";
-      console.error("Error fetching users:", err);
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    const loadUsers = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const sort = searchParams.get("sort");
+        const result = await fetchUsers(currentPage, 10, sort || undefined);
+        console.log("Fetched result:", result);
+        setUsersData({
+          users: result,
+          totalPages: Math.ceil(result.length / 10),
+        });
+      } catch (err) {
+        setError("Failed to fetch users");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (loading) {
-    return <div className="flex justify-center p-4">Loading users...</div>;
-  }
+    loadUsers();
+  }, [currentPage, searchParams]);
 
-  if (error) {
-    return (
-      <div className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg">
-        {error}
-      </div>
-    );
-  }
+  const handleSort = (column: string) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("sort", column);
+    router.push(`?${params.toString()}`);
+  };
 
-  if (!users.length) {
-    return <div className="text-center p-4 text-gray-500">No users found.</div>;
-  }
+  if (loading) return <div data-testid="loading-spinner">Loading...</div>;
+  if (error) return <div>{error}</div>;
+  if (!usersData?.users?.length) return <div>No users found</div>;
 
   return (
-    <div className="mt-8 flow-root">
-      <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-        <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-          <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-            <table className="min-w-full divide-y divide-gray-300">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">
-                    Name
-                  </th>
-                  <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                    Email
-                  </th>
-                  <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                    Joined
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                {users.map((user) => (
-                  <tr key={user.id}>
-                    <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900">
-                      {user.name || "N/A"}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {user.email}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                      {new Date(user.createdAt).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-100">
+          <tr>
+            <th
+              className="px-6 py-3 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider cursor-pointer"
+              onClick={() => handleSort("name")}
+            >
+              Name
+            </th>
+            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider">
+              Email
+            </th>
+            <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900 uppercase tracking-wider">
+              Role
+            </th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {usersData.users.map((user) => (
+            <tr key={user.id} className="hover:bg-gray-50">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {user.name}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {user.email}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {user.role}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {usersData.totalPages > 1 && (
+        <div className="px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            aria-label="previous page"
+            className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <button
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, usersData.totalPages))
+            }
+            disabled={currentPage === usersData.totalPages}
+            aria-label="next page"
+            className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+          >
+            Next
+          </button>
         </div>
-      </div>
+      )}
     </div>
   );
 }
