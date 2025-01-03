@@ -1,0 +1,10 @@
+diff --git a/.gitignore b/.gitignore
+index d655b1a..1b97196 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -43,3 +43,5 @@ next-env.d.ts
+ # Logs
+ logs
+ *.log
++
++.zshrc
