@@ -26,7 +26,7 @@ describe("LoginForm", () => {
     ).toBeInTheDocument();
   });
 
-  it.skip("shows name field when switching to signup mode", async () => {
+  it("shows name field when switching to signup mode", async () => {
     render(<LoginForm />);
 
     const signupButton = screen.getByText(/don't have an account\?/i);
