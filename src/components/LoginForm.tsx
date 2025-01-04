@@ -1,6 +1,6 @@
+// src/components/LoginForm.tsx
 "use client";
 import { useState } from "react";
-
 import { signIn } from "next-auth/react";
 
 type FormData = {
@@ -47,6 +47,10 @@ export default function LoginForm() {
   const handleModeToggle = (mode: boolean) => {
     setIsSignup(mode);
     setError(null);
+  };
+
+  const handleGoogleSignIn = () => {
+    signIn("google", { callbackUrl: "/dashboard" });
   };
 
   return (
@@ -149,6 +153,28 @@ export default function LoginForm() {
               : isSignup
               ? "Create Account"
               : "Log In"}
+          </button>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">
+                Or continue with
+              </span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleGoogleSignIn}
+            className="w-full py-2 px-4 border border-gray-300 rounded-md
+              shadow-sm text-sm font-medium text-gray-700 bg-white
+              hover:bg-gray-50 focus:outline-none focus:ring-2
+              focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            Sign in with Google
           </button>
 
           {isSignup && (
