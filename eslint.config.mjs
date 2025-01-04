@@ -1,34 +1,59 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
+// eslint.config.mjs
+import globals from "globals";
+import js from "@eslint/js";
+import jest from "eslint-plugin-jest";
+import * as tseslint from "typescript-eslint";
+import nextPlugin from "@next/eslint-plugin-next";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+export default [
+  // Base configuration for all files
   {
-    files: ["**/*.ts", "**/*.tsx"],
+    ignores: ["build/*", "dist/*", "node_modules/*"],
+  },
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  {
+    files: ["**/*.{js,jsx,ts,tsx}"],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+      parserOptions: {
+        ecmaVersion: "latest",
+        sourceType: "module",
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+    },
+    plugins: {
+      "@next/next": nextPlugin,
+    },
     rules: {
-      "@typescript-eslint/no-explicit-any": "error", // Changed from "warn" to "error"
-      "@typescript-eslint/explicit-function-return-type": "off",
-      "@typescript-eslint/explicit-module-boundary-types": "off",
+      "@typescript-eslint/no-unused-vars": "error",
+      // Add Next.js specific rules
+      "@next/next/no-html-link-for-pages": "error",
     },
   },
+  // Jest specific configuration
   {
-    files: ["jest.config.js", "jest.setup.js"],
-    rules: {
-      "@typescript-eslint/no-require-imports": "off",
-      "@typescript-eslint/no-var-requires": "off",
+    files: ["**/__tests__/**/*.[jt]s?(x)", "**/*.{test,spec}.[jt]s?(x)"],
+    plugins: {
+      jest,
     },
-  },
-  {
-    ignores: ["**/node_modules/**", "**/.next/**", "**/dist/**"],
+    languageOptions: {
+      globals: {
+        ...globals.jest,
+      },
+    },
+    rules: {
+      ...jest.configs.recommended.rules,
+      "jest/no-focused-tests": "error",
+      "jest/no-disabled-tests": "warn",
+      "jest/expect-expect": "error",
+      "jest/no-identical-title": "error",
+      "jest/valid-expect": "error",
+    },
   },
 ];
-
-export default eslintConfig;

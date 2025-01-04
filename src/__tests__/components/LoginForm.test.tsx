@@ -1,5 +1,5 @@
 // src/__tests__/components/LoginForm.test.tsx
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { signIn } from "next-auth/react";
 import LoginForm from "@/components/LoginForm";
