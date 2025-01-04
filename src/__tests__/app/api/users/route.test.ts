@@ -1,4 +1,4 @@
-import { prismaMock } from "../../../singleton";
+import { prismaMock } from "@/mocks/prisma";
 import { GET, POST } from "@/app/api/users/route";
 import { GET as GET_BY_ID, PUT } from "@/app/api/users/[id]/route";
 import { mockReset } from "jest-mock-extended";
