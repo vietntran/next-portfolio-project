@@ -1,5 +1,5 @@
 // src/__tests__/app/api/auth/signup/route.test.ts
-import { prismaMock } from "../../../../singleton";
+import { prismaMock } from "@/mocks/prisma";
 import { POST } from "@/app/api/auth/signup/route";
 import { mockReset } from "jest-mock-extended";
 
