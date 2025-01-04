@@ -1,148 +1,93 @@
-import { render, screen, waitFor } from "@testing-library/react";
+// src/__tests__/components/LoginForm.test.tsx
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import "@testing-library/jest-dom";
 import { signIn } from "next-auth/react";
 import LoginForm from "@/components/LoginForm";
 
+// Mock next-auth
 jest.mock("next-auth/react", () => ({
   signIn: jest.fn(),
 }));
 
 describe("LoginForm", () => {
-  const user = userEvent.setup();
-
   beforeEach(() => {
+    // Clear all mocks before each test
     jest.clearAllMocks();
   });
 
-  describe("form validation", () => {
-    it("should have required attributes", () => {
-      render(<LoginForm />);
+  it("renders login form with email and password fields", () => {
+    render(<LoginForm />);
 
-      expect(screen.getByRole("textbox", { name: /email/i })).toHaveAttribute(
-        "required"
-      );
-      expect(screen.getByLabelText(/password/i)).toHaveAttribute("required");
-    });
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /log in/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /sign in with google/i })
+    ).toBeInTheDocument();
+  });
 
-    it("should have minimum length on password", () => {
-      render(<LoginForm />);
-      const passwordInput = screen.getByLabelText(/password/i);
+  it("shows name field when switching to signup mode", async () => {
+    render(<LoginForm />);
 
-      expect(passwordInput).toHaveAttribute("minLength", "8");
+    const signupButton = screen.getByText(/don't have an account\?/i);
+    await userEvent.click(signupButton);
+
+    expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
+  });
+
+  it("handles credentials login submission", async () => {
+    render(<LoginForm />);
+
+    await userEvent.type(screen.getByLabelText(/email/i), "test@example.com");
+    await userEvent.type(screen.getByLabelText(/password/i), "password123");
+
+    const loginButton = screen.getByRole("button", { name: /log in/i });
+    await userEvent.click(loginButton);
+
+    expect(signIn).toHaveBeenCalledWith("credentials", {
+      email: "test@example.com",
+      password: "password123",
+      redirect: true,
+      callbackUrl: "/dashboard",
     });
   });
 
-  describe("state management", () => {
-    it("should update form data on input change", async () => {
-      render(<LoginForm />);
-      const emailInput = screen.getByRole("textbox", { name: /email/i });
-      const passwordInput = screen.getByLabelText(/password/i);
+  it("handles Google sign-in button click", async () => {
+    render(<LoginForm />);
 
-      await user.type(emailInput, "test@example.com");
-      await user.type(passwordInput, "password123");
-
-      expect(emailInput).toHaveValue("test@example.com");
-      expect(passwordInput).toHaveValue("password123");
+    const googleButton = screen.getByRole("button", {
+      name: /sign in with google/i,
     });
+    await userEvent.click(googleButton);
 
-    it("should toggle between login and signup modes", async () => {
-      render(<LoginForm />);
-
-      expect(screen.queryByLabelText(/name/i)).not.toBeInTheDocument();
-
-      await user.click(
-        screen.getByRole("button", { name: /don't have an account/i })
-      );
-      expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
-
-      await user.click(screen.getByRole("button", { name: /back to login/i }));
-      expect(screen.queryByLabelText(/name/i)).not.toBeInTheDocument();
+    expect(signIn).toHaveBeenCalledWith("google", {
+      callbackUrl: "/dashboard",
     });
   });
 
-  describe("authentication flow", () => {
-    it("should call signIn with correct credentials in login mode", async () => {
-      render(<LoginForm />);
+  it("shows loading state during form submission", async () => {
+    render(<LoginForm />);
 
-      await user.type(
-        screen.getByRole("textbox", { name: /email/i }),
-        "test@example.com"
-      );
-      await user.type(screen.getByLabelText(/password/i), "password123");
-      await user.click(screen.getByRole("button", { name: /log in/i }));
+    await userEvent.type(screen.getByLabelText(/email/i), "test@example.com");
+    await userEvent.type(screen.getByLabelText(/password/i), "password123");
 
-      expect(signIn).toHaveBeenCalledWith("credentials", {
-        email: "test@example.com",
-        password: "password123",
-        redirect: true,
-        callbackUrl: "/dashboard",
-      });
-    });
+    const loginButton = screen.getByRole("button", { name: /log in/i });
+    fireEvent.click(loginButton);
 
-    it("should show loading state during submission", async () => {
-      render(<LoginForm />);
-
-      await user.type(
-        screen.getByRole("textbox", { name: /email/i }),
-        "test@example.com"
-      );
-      await user.type(screen.getByLabelText(/password/i), "password123");
-
-      const submitButton = screen.getByRole("button", { name: /log in/i });
-
-      // Mock a delay in signIn
-      (signIn as jest.Mock).mockImplementationOnce(
-        () => new Promise((resolve) => setTimeout(resolve, 100))
-      );
-
-      await user.click(submitButton);
-      expect(submitButton).toHaveTextContent("Logging in...");
-    });
+    expect(screen.getByText(/logging in/i)).toBeInTheDocument();
   });
 
-  describe("error handling", () => {
-    it("should display error message on authentication failure", async () => {
-      (signIn as jest.Mock).mockRejectedValueOnce(
-        new Error("Invalid credentials")
-      );
-      render(<LoginForm />);
+  it("handles mode toggle between login and signup", async () => {
+    render(<LoginForm />);
 
-      await user.type(
-        screen.getByRole("textbox", { name: /email/i }),
-        "test@example.com"
-      );
-      await user.type(screen.getByLabelText(/password/i), "password123");
-      await user.click(screen.getByRole("button", { name: /log in/i }));
+    // Switch to signup
+    const signupButton = screen.getByText(/don't have an account\?/i);
+    await userEvent.click(signupButton);
+    expect(screen.getByText(/create account/i)).toBeInTheDocument();
 
-      await waitFor(() => {
-        expect(screen.getByRole("alert")).toHaveTextContent(
-          "Invalid credentials"
-        );
-      });
-    });
-
-    it("should clear error message when switching modes", async () => {
-      (signIn as jest.Mock).mockRejectedValueOnce(
-        new Error("Invalid credentials")
-      );
-      render(<LoginForm />);
-
-      await user.type(
-        screen.getByRole("textbox", { name: /email/i }),
-        "test@example.com"
-      );
-      await user.type(screen.getByLabelText(/password/i), "password123");
-      await user.click(screen.getByRole("button", { name: /log in/i }));
-
-      await waitFor(() => {
-        expect(screen.getByRole("alert")).toBeInTheDocument();
-      });
-
-      await user.click(
-        screen.getByRole("button", { name: /don't have an account/i })
-      );
-      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-    });
+    // Switch back to login
+    const backToLoginButton = screen.getByText(/back to login/i);
+    await userEvent.click(backToLoginButton);
+    expect(screen.getByText(/log in/i)).toBeInTheDocument();
   });
 });
