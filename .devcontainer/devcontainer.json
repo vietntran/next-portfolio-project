@@ -25,7 +25,8 @@
         "editor.fontLigatures": true,
         "editor.fontSize": 14,
         "editor.lineHeight": 1.5,
-        "workbench.colorTheme": "GitHub Dark Default"
+        "workbench.colorTheme": "GitHub Dark Default",
+        "terminal.integrated.defaultProfile.linux": "zsh"
       }
     }
   },
@@ -34,7 +35,12 @@
       "version": "18"
     },
     "ghcr.io/devcontainers/features/git:1": {},
-    "ghcr.io/devcontainers/features/github-cli:1": {}
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "configureZshAsDefaultShell": true,
+      "installOhMyZsh": true
+    }
   },
   "forwardPorts": [3000, 5432],
   "mounts": [
