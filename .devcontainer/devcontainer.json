@@ -25,6 +25,8 @@
         "editor.fontLigatures": true,
         "editor.fontSize": 14,
         "editor.lineHeight": 1.5,
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "typescript.updateImportsOnFileMove.enabled": "always",
         "workbench.colorTheme": "GitHub Dark Default"
       }
     }
@@ -34,6 +36,7 @@
     "ghcr.io/devcontainers/features/github-cli:1": {}
   },
   "forwardPorts": [3000, 5432],
+  "postCreateCommand": "npm install",
   "mounts": [
     "source=${localWorkspaceFolder}/logs,target=/workspace/logs,type=bind,consistency=cached"
   ]

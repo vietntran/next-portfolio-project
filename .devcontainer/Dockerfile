@@ -4,9 +4,8 @@ FROM mcr.microsoft.com/devcontainers/javascript-node:18
 RUN apt-get update && apt-get install -y \
     less \
     man-db \
-    zsh
-
-# Install necessary global packages
-RUN su node -c "npm install -g typescript ts-node prisma@latest"
+    zsh && \
+    su node -c "npm install -g prisma@latest" && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 USER node
