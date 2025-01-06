@@ -39,5 +39,6 @@
   "postCreateCommand": "npm install",
   "mounts": [
     "source=${localWorkspaceFolder}/logs,target=/workspace/logs,type=bind,consistency=cached"
-  ]
+  ],
+  "remoteUser": "node"
 }
