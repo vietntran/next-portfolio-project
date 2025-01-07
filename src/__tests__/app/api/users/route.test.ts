@@ -52,7 +52,7 @@ describe("User API Routes", () => {
       expect(mockedLogger.error).not.toHaveBeenCalled();
       expect(mockedLogger.info).toHaveBeenCalledWith(
         "Users fetched successfully",
-        { count: mockPrismaUsers.length }
+        { count: mockPrismaUsers.length },
       );
       expect(response.status).toBe(200);
       expect(data[0]).toEqual({
@@ -117,7 +117,7 @@ describe("User API Routes", () => {
           id: mockPrismaCreatedUser.id,
           email: newUser.email,
           name: newUser.name,
-        }
+        },
       );
       expect(response.status).toBe(200);
       expect(data).toEqual({
@@ -226,7 +226,7 @@ describe("User API Routes", () => {
           method: "PUT",
           body: JSON.stringify(updateData),
         }),
-        { params: { id: userId } }
+        { params: { id: userId } },
       );
 
       const data = await response.json();
@@ -259,7 +259,7 @@ describe("User API Routes", () => {
           method: "PUT",
           body: JSON.stringify(updateData),
         }),
-        { params: { id: userId } }
+        { params: { id: userId } },
       );
 
       const data = await response.json();
@@ -279,7 +279,7 @@ describe("User API Routes", () => {
           method: "PUT",
           body: JSON.stringify(invalidData),
         }),
-        { params: { id: userId } }
+        { params: { id: userId } },
       );
 
       const data = await response.json();
