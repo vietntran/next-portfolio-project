@@ -4,6 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import { hash } from "bcryptjs";
 import { z } from "zod";
 import logger from "@/lib/logger";
+import { excludeFields } from "@/lib/objectUtils";
 
 const prisma = new PrismaClient();
 
@@ -51,8 +52,7 @@ export async function POST(request: Request) {
 
     logger.info("User created successfully", { userId: user.id });
 
-    // Return user without password
-    const { password: _, ...userWithoutPassword } = user;
+    const userWithoutPassword = excludeFields(user, ["password"]);
     return NextResponse.json(userWithoutPassword);
   } catch (error) {
     logger.error("Signup failed", {
