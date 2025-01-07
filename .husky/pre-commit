@@ -1,0 +1,5 @@
+# Check for .only in test files
+! find . -type f -name "*.test.*" -o -name "*.spec.*" | xargs grep -l "\.only"
+
+# Run lint-staged
+npx lint-staged
