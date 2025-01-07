@@ -1,7 +1,8 @@
 // src/__tests__/components/LoginForm.test.tsx
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { signIn } from "next-auth/react";
+import { act } from "react";
 import LoginForm from "@/components/LoginForm";
 
 // Mock next-auth
@@ -10,8 +11,9 @@ jest.mock("next-auth/react", () => ({
 }));
 
 describe("LoginForm", () => {
+  const user = userEvent.setup();
+
   beforeEach(() => {
-    // Clear all mocks before each test
     jest.clearAllMocks();
   });
 
@@ -22,15 +24,16 @@ describe("LoginForm", () => {
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /log in/i })).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /sign in with google/i })
+      screen.getByRole("button", { name: /sign in with google/i }),
     ).toBeInTheDocument();
   });
 
   it("shows name field when switching to signup mode", async () => {
     render(<LoginForm />);
 
-    const signupButton = screen.getByText(/don't have an account\?/i);
-    await userEvent.click(signupButton);
+    await act(async () => {
+      await user.click(screen.getByText(/don't have an account\?/i));
+    });
 
     expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
   });
@@ -38,11 +41,11 @@ describe("LoginForm", () => {
   it("handles credentials login submission", async () => {
     render(<LoginForm />);
 
-    await userEvent.type(screen.getByLabelText(/email/i), "test@example.com");
-    await userEvent.type(screen.getByLabelText(/password/i), "password123");
-
-    const loginButton = screen.getByRole("button", { name: /log in/i });
-    await userEvent.click(loginButton);
+    await act(async () => {
+      await user.type(screen.getByLabelText(/email/i), "test@example.com");
+      await user.type(screen.getByLabelText(/password/i), "password123");
+      await user.click(screen.getByRole("button", { name: /log in/i }));
+    });
 
     expect(signIn).toHaveBeenCalledWith("credentials", {
       email: "test@example.com",
@@ -55,10 +58,11 @@ describe("LoginForm", () => {
   it("handles Google sign-in button click", async () => {
     render(<LoginForm />);
 
-    const googleButton = screen.getByRole("button", {
-      name: /sign in with google/i,
+    await act(async () => {
+      await user.click(
+        screen.getByRole("button", { name: /sign in with google/i }),
+      );
     });
-    await userEvent.click(googleButton);
 
     expect(signIn).toHaveBeenCalledWith("google", {
       callbackUrl: "/dashboard",
@@ -66,13 +70,17 @@ describe("LoginForm", () => {
   });
 
   it("shows loading state during form submission", async () => {
+    (signIn as jest.Mock).mockImplementation(
+      () => new Promise((resolve) => setTimeout(resolve, 100)),
+    );
+
     render(<LoginForm />);
 
-    await userEvent.type(screen.getByLabelText(/email/i), "test@example.com");
-    await userEvent.type(screen.getByLabelText(/password/i), "password123");
-
-    const loginButton = screen.getByRole("button", { name: /log in/i });
-    fireEvent.click(loginButton);
+    await act(async () => {
+      await user.type(screen.getByLabelText(/email/i), "test@example.com");
+      await user.type(screen.getByLabelText(/password/i), "password123");
+      await user.click(screen.getByRole("button", { name: /log in/i }));
+    });
 
     expect(screen.getByText(/logging in/i)).toBeInTheDocument();
   });
@@ -81,13 +89,15 @@ describe("LoginForm", () => {
     render(<LoginForm />);
 
     // Switch to signup
-    const signupButton = screen.getByText(/don't have an account\?/i);
-    await userEvent.click(signupButton);
+    await act(async () => {
+      await user.click(screen.getByText(/don't have an account\?/i));
+    });
     expect(screen.getByText(/create account/i)).toBeInTheDocument();
 
     // Switch back to login
-    const backToLoginButton = screen.getByText(/back to login/i);
-    await userEvent.click(backToLoginButton);
+    await act(async () => {
+      await user.click(screen.getByText(/back to login/i));
+    });
     expect(screen.getByText(/log in/i)).toBeInTheDocument();
   });
 });
