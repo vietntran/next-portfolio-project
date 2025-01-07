@@ -21,13 +21,8 @@
         "editor.codeActionsOnSave": {
           "source.fixAll.eslint": true
         },
-        "editor.fontFamily": "JetBrains Mono, 'Fira Code', 'Source Code Pro', Menlo, Monaco, 'Courier New', monospace",
-        "editor.fontLigatures": true,
-        "editor.fontSize": 14,
-        "editor.lineHeight": 1.5,
         "terminal.integrated.defaultProfile.linux": "zsh",
-        "typescript.updateImportsOnFileMove.enabled": "always",
-        "workbench.colorTheme": "GitHub Dark Default"
+        "typescript.updateImportsOnFileMove.enabled": "always"
       }
     }
   },
