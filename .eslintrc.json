@@ -12,6 +12,12 @@
         "@typescript-eslint/no-require-imports": "off",
         "@typescript-eslint/no-var-requires": "off"
       }
+    },
+    {
+      "files": ["**/*.test.ts", "**/*.test.tsx", "src/__tests__/**/*"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off"
+      }
     }
   ],
   "ignorePatterns": ["node_modules/", ".next/", "dist/"]

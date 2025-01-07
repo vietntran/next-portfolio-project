@@ -26,7 +26,7 @@ export default function LoginForm() {
 
     try {
       if (!isSignup) {
-        const result = await signIn("credentials", {
+        await signIn("credentials", {
           email: formData.email,
           password: formData.password,
           redirect: true,
@@ -193,7 +193,7 @@ export default function LoginForm() {
               onClick={() => handleModeToggle(true)}
               className="w-full py-2 px-4 text-sm font-medium text-gray-600 hover:text-gray-900"
             >
-              Don't have an account? Sign Up →
+              Don&apos;t have an account? Sign Up →
             </button>
           )}
         </div>

@@ -1,5 +1,4 @@
 // src/__tests__/app/api/auth/login/route.test.ts
-import { NextResponse } from "next/server";
 import { prismaMock } from "@/mocks/prisma";
 import { POST } from "@/app/api/auth/login/route";
 import { mockReset } from "jest-mock-extended";
