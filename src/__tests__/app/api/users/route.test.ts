@@ -26,7 +26,7 @@ describe("User API Routes", () => {
   describe("GET /api/users", () => {
     const userId = "clr1234567890";
 
-    it.only("should return all users successfully", async () => {
+    it("should return all users successfully", async () => {
       const currentDate = new Date();
       const mockPrismaUsers = [
         {
