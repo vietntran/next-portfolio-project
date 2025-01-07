@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "type-check": "tsc --noEmit --skipLibCheck",
+    "type-check:strict": "tsc --noEmit --strict",
+    "type-check:watch": "tsc --noEmit --watch --noImplicitAny --strictNullChecks"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.7.4",
